@@ -19,7 +19,7 @@ function urlIs($value)
 // return to project base directory
 function base_path($path)
 {
-    return __DIR__ . '/../' . $path;
+    return BASE_PATH . $path;
 }
 
 // return the selected view
