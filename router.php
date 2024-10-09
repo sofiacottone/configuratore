@@ -3,10 +3,7 @@
 // get current uri path
 $uri = parse_url($_SERVER['REQUEST_URI'])['path'];
 
-$routes = [
-    '/' => 'controllers/index.php',
-    '/checkout' => 'controllers/checkout.php',
-];
+$routes = require('routes.php');
 
 // handle existing routes or abort
 function routeToController($uri, $routes)

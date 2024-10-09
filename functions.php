@@ -15,3 +15,16 @@ function urlIs($value)
     // return -> boolean
     return $_SERVER['REQUEST_URI'] === $value;
 }
+
+// return to project base directory
+function base_path($path)
+{
+    return __DIR__ . '/../' . $path;
+}
+
+// return the selected view
+function view($path, $attributes = [])
+{
+    extract($attributes);
+    require base_path('views/' . $path);
+}

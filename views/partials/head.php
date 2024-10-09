@@ -7,7 +7,7 @@
     <title>Configuratore</title>
 
     <!-- tailwind cdn -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,aspect-ratio"></script>
 </head>
 
 <body class="h-full dark:bg-slate-700">

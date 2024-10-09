@@ -8,6 +8,8 @@ $db = new Database($config['database']);
 // fetch all products
 $products = $db->query("select * from products")->fetchAll(PDO::FETCH_ASSOC);
 
-$heading = 'Home';
-
-require 'views/index.view.php';
+// return the selected view with data
+view('index.view.php', [
+    'heading' => 'Home',
+    'products' => $products
+]);
