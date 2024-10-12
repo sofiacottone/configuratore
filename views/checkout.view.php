@@ -5,6 +5,27 @@
 <main class="dark:text-white">
     <div id="checkout-page" class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
 
+        <!-- success message container  -->
+        <div id="success-container" class="hidden relative z-50" role="dialog" aria-modal="true">
+
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto bg-white dark:bg-gray-600/95">
+                <div class="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
+
+                    <div class="flex flex-col gap-20 justify-center align-center w-full transform text-left text-base transition md:my-8 md:max-w-2xl md:px-4 lg:max-w-4xl">
+
+                        <div id="message-container" class="w-full text-center text-lg text-green-600">
+
+                        </div>
+
+                        <button type="button" id="close-success-message" class="modal-submit mx-auto rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            <a href="/">Torna alla home</a>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end success message container  -->
+
         <!-- order summary -->
         <div class="mb-6 py-2 border-b border-gray-900/10">
             <h2 class="text-lg font-semibold">Riepilogo ordine</h2>
@@ -20,9 +41,9 @@
         </div>
 
         <!-- customer data  -->
-        <form>
+        <form method="POST" action="/checkout" id="checkout-form">
             <div class="space-y-12">
-
+                <div class="error-message"></div>
 
                 <div class="border-b border-gray-900/10 pb-12 text-gray-900 dark:text-white">
                     <h2 class="text-lg font-semibold leading-7">Inserisci le tue informazioni personali per procedere</h2>

@@ -23,6 +23,60 @@ function closeElement(el) {
     el.classList.add('hidden');
 }
 
+// calculate the price of each product based on the configuration
+function calculateProductPrice(basePrice, config) {
+    let finalPrice = parseFloat(basePrice);
+
+    // check the values of the config selection
+    // sites number
+    if (config.sites_number.value === '2') {
+        finalPrice *= 1.1;
+    } else if (config.sites_number.value === '3') {
+        finalPrice *= 1.2
+    }
+
+    // users number
+    if (config.users_number.value === '2') {
+        finalPrice *= 1.1;
+    } else if (config.users_number.value === '3') {
+        finalPrice *= 1.2
+    }
+
+    // annual waste
+    if (config.annual_waste.value === '2') {
+        finalPrice *= 1.1;
+    } else if (config.annual_waste.value === '3') {
+        finalPrice *= 1.2
+    }
+
+    // check the subscription type
+    if (config.subscription_type === 'annually') {
+        finalPrice *= 12;
+        // 20% discount
+        finalPrice *= 0.8;
+    }
+
+    return finalPrice.toFixed(2);
+
+}
+
+// calculate the total price of the order
+function calculateTotalPrice(cart) {
+    totalPrice = 0;
+    cart.forEach((product) => {
+        // calculate single product price
+        const productPrice = calculateProductPrice(product.basePrice, product.config);
+
+        // sum product price to total price
+        totalPrice += parseFloat(productPrice);
+    });
+
+    // save to ls
+    localStorage.setItem('totalPrice', totalPrice.toFixed(2));
+
+    return totalPrice.toFixed(2);
+}
+
 
 window.addEventListener('DOMContentLoaded', (event) => {
 
@@ -44,9 +98,49 @@ window.addEventListener('DOMContentLoaded', (event) => {
         // get the modal
         const productModal = document.getElementById('product-modal');
 
+        // update price
+        function updatePrice() {
+            // get product config values
+            const subscription_type = document.querySelector('input[name="subscription_type"]:checked').value;
+            const sites_number_value = sites_number.value;
+            const users_number_value = users_number.value;
+            const annual_waste_value = annual_waste.value;
+
+            // create a temporary obj with the current configuration
+            const currentConfig = {
+                sites_number: { value: sites_number_value },
+                users_number: { value: users_number_value },
+                annual_waste: { value: annual_waste_value },
+                subscription_type
+            };
+
+            // calculate the new price based on the current product config
+            const newPrice = calculateProductPrice(productPrice, currentConfig);
+
+            // update price displayed in the modal
+            productModal.querySelector('.modal-price').textContent = `${newPrice}€`;
+        }
+
+        // reset form
+        function resetForm() {
+            // reset input values 
+            sites_number.value = '1';
+            users_number.value = '1';
+            annual_waste.value = '1';
+
+            // reset input radios to 'monthly' value
+            const subscriptionRadios = document.querySelectorAll('input[name="subscription_type"][value="monthly"]');
+            subscriptionRadios.forEach(radio => {
+                radio.checked = true;
+            });
+
+            // update price
+            updatePrice();
+        }
+
         allOpenButtons.forEach((openButton) => {
             openButton.addEventListener('click', function () {
-
+                resetForm();
                 // open the modal
                 productModal.classList.remove('hidden');
 
@@ -61,10 +155,20 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 productPrice = Number(this.dataset.productPrice);
                 productId = this.dataset.productId;
 
+                // add event listener to inputs and selects to update product price on change
+                sites_number.addEventListener('change', updatePrice);
+                users_number.addEventListener('change', updatePrice);
+                annual_waste.addEventListener('change', updatePrice);
+                const subscriptionRadios = document.querySelectorAll('input[name="subscription_type"]');
+                subscriptionRadios.forEach(radio => {
+                    radio.addEventListener('change', updatePrice);
+                });
+
+                // call updatePrice to set initial price
+                updatePrice();
 
                 // print html inside the modal
                 productModal.querySelector('.modal-title').textContent = productName;
-                productModal.querySelector('.modal-price').textContent = `${productPrice}€`;
 
                 // get the btn that submits the modal
                 const modalSubmit = document.querySelector('.modal-submit');
@@ -170,6 +274,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             } else {
                 // show checkout btn 
                 checkoutBtn.classList.remove('hidden');
+
                 // loop every product in the cart
                 cart.forEach((product, index) => {
                     let finalPrice = calculateProductPrice(product.basePrice, product.config);
@@ -203,7 +308,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     // populate the <li> with the product data
                     newLi.innerHTML = `
                 <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                    <img src="https://striano.io/wp-content/uploads/2023/10/e9697ba81c24857d041035de729cd174c4b04b4f-2800x1200-1.png" alt="Salmon orange fabric pouch with match zipper, gray zipper pull, and adjustable hip belt." class="h-full w-full object-cover object-center">
+                    <img src="https://striano.io/wp-content/uploads/2023/10/e9697ba81c24857d041035de729cd174c4b04b4f-2800x1200-1.png" alt="Green software placeholder" class="h-full w-full object-cover object-center">
                 </div>
     
                 <div class="ml-4 flex flex-1 flex-col">
@@ -285,9 +390,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
         // EMPTY CART
         const emptyCartButton = document.getElementById('empty-cart');
 
-        // get the items container (ul)
-        const cartItemsContainer = document.getElementById('cart-items');
-
         emptyCartButton.addEventListener('click', function () {
             // empty cart
             cart = [];
@@ -304,57 +406,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
         });
         // END EMPTY CART
 
-        function calculateProductPrice(basePrice, config) {
-            let finalPrice = parseFloat(basePrice);
 
-            // check the values of the config selection
-            // sites number
-            if (config.sites_number.value === '2') {
-                finalPrice *= 1.1;
-            } else if (config.sites_number.value === '3') {
-                finalPrice *= 1.2
-            }
-
-            // users number
-            if (config.users_number.value === '2') {
-                finalPrice *= 1.1;
-            } else if (config.users_number.value === '3') {
-                finalPrice *= 1.2
-            }
-
-            // annual waste
-            if (config.annual_waste.value === '2') {
-                finalPrice *= 1.1;
-            } else if (config.annual_waste.value === '3') {
-                finalPrice *= 1.2
-            }
-
-            // check the subscription type
-            if (config.subscription_type === 'annually') {
-                finalPrice *= 12;
-                // 20% discount
-                finalPrice *= 0.8;
-            }
-
-            return finalPrice.toFixed(2);
-
-        }
-
-        function calculateTotalPrice(cart) {
-            totalPrice = 0;
-            cart.forEach((product) => {
-                // calculate single product price
-                const productPrice = calculateProductPrice(product.basePrice, product.config);
-
-                // sum product price to total price
-                totalPrice += parseFloat(productPrice);
-            });
-
-            // save to ls
-            localStorage.setItem('totalPrice', totalPrice.toFixed(2));
-
-            return totalPrice.toFixed(2);
-        }
         // END SHOPPING CART
     }
 
@@ -367,7 +419,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
         // on click to the purchase button send the cart data to the server
         const purchaseBtn = document.getElementById('purchase-btn');
-        purchaseBtn.addEventListener('click', sendCartToServer());
+        purchaseBtn.addEventListener('click', sendDataToServer());
     }
 
 });
@@ -428,10 +480,11 @@ function displayOrderSummary() {
     document.querySelector('.summary-total-price').textContent = `${totalPrice}€`;
 }
 
-// send cart data to the server
-function sendCartToServer() {
-    // get the cart from localStorage
+// send cart and form data to the server
+function sendDataToServer() {
+    // get the cart and the order total price from localStorage
     let cart = JSON.parse(localStorage.getItem('cart'));
+    let totalPrice = localStorage.getItem('totalPrice') || 0;
 
     // check if the cart exists and is not empty
     if (!cart || cart.length === 0) {
@@ -439,24 +492,93 @@ function sendCartToServer() {
         return;
     }
 
-    // send the cart to the server 
-    fetch('/checkout', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(cart)
-    })
-        // convert the server response into json
-        .then((response) => response.json())
-        .then((data) => {
-            // print server data
-            console.log('Successo:', data);
-        })
-        // handle errors if any
-        .catch((error) => {
-            console.error('Errore:', error);
+    // get form data
+    const form = document.getElementById('checkout-form');
+
+    // create an empty obj for form data
+    let formData = {};
+
+    // select all inputs
+    let inputs = form.querySelectorAll('input');
+
+    // submit
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // loop through inputs to add values to the formData object
+        inputs.forEach((input) => {
+            // use the input name as key
+            formData[input.name] = input.value;
         });
+
+        // create a single obj to send
+        let dataToSend = {
+            cart,
+            totalPrice,
+            customer: formData
+        };
+
+        // send data to server
+        fetch('/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend),
+        })
+            // convert the server response into json
+            .then((response) => response.json())
+            .then((data) => {
+                // clear previous errors
+                document.querySelectorAll('.error-message').forEach(el => el.remove());
+
+                if (data.status === 'success') {
+                    // open container to display success message
+                    const successContainer = document.getElementById('success-container');
+                    if (successContainer) {
+                        successContainer.classList.remove('hidden');
+                    }
+                    // clear previous messages 
+                    const messageContainer = document.getElementById('message-container');
+                    if (messageContainer) {
+                        messageContainer.innerHTML = '';
+                        // display success message
+                        const successMessage = document.createElement('p');
+                        successMessage.textContent = data.message;
+                        messageContainer.appendChild(successMessage);
+                    }
+
+                    // clear the cart
+                    cart = []
+                    // update localstorage
+                    localStorage.setItem('cart', JSON.stringify(cart));
+
+                }
+                else if (data.status === 'error') {
+
+                    // show errors next to the corresponding inputs
+                    for (let field in data.errors) {
+                        const errorMessage = document.createElement('p');
+                        errorMessage.classList.add('text-red-500', 'text-xs', 'error-message');
+                        errorMessage.textContent = data.errors[field];
+
+                        // find the corresponding input field and append the error
+                        const inputField = document.querySelector(`[name="${field}"]`);
+                        if (inputField) {
+                            inputField.insertAdjacentElement('afterend', errorMessage);
+                        }
+                    }
+                } else {
+                    // print server data
+                    console.log('Successo:', data);
+                }
+            })
+            // handle errors if any
+            .catch((error) => {
+                console.error('Errore:', error);
+            });
+    })
+
 }
 
 // END SUMMARY SECTION

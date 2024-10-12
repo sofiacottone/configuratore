@@ -22,14 +22,19 @@ class Database
         ]);
     }
 
-    public function query($query)
+    public function query($query, $params = [])
     {
         // prepare a query to send to mysql
         $statement = $this->connection->prepare($query);
         // execute the query
-        $statement->execute();
+        $statement->execute($params);
 
         // fetch all the products as an associative array
         return $statement;
+    }
+
+    public function lastInsertId()
+    {
+        return $this->connection->lastInsertId();
     }
 }
